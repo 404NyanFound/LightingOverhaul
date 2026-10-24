@@ -103,6 +103,26 @@ namespace LightingOverhaul
     {
         public static bool TryGetPlayerPosition(out Vector3 pos)
         {
+            // In VR mode, use XR InputDevice to get headset position directly
+            try
+            {
+                var device = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head);
+                if (device.isValid)
+                {
+                    Vector3 headPos;
+                    if (device.TryGetFeatureValue(UnityEngine.XR.CommonUsages.devicePosition, out headPos))
+                    {
+                        pos = headPos;
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // XR not available, fall through to other methods
+            }
+
+            // Standard desktop mode: use main camera
             if (Camera.main != null)
             {
                 pos = Camera.main.transform.position;
